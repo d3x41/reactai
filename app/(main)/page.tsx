@@ -19,7 +19,6 @@ import { useTheme } from "next-themes"
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Github } from "lucide-react";
-import Image from "next/image";
 
 export default function Home() {
   let [status, setStatus] = useState<
@@ -27,12 +26,16 @@ export default function Home() {
   >("initial");
   let [prompt, setPrompt] = useState("");
   let models = [
-    { label: "claude-3-5-sonnet", value: "claude-3-5-sonnet" },
-    { label: "claude-3-5-sonnet-20240620", value: "claude-3-5-sonnet-20240620" },
-    { label: "claude-sonnet-3.5", value: "claude-sonnet-3.5" },
-    { label: "claude", value: "claude" },
+    { label: "anthropic/claude-3.5-sonnet", value: "anthropic/claude-3.5-sonnet" },
+    { label: "Claude-sonnet-3.7", value: "Claude-sonnet-3.7" },
+  ];
+  let uiLibraries = [
+    { label: "ReactAI", value: "reactai" },
+    { label: "shadcn/ui", value: "shadcn" },
+    { label: "Aceternity UI", value: "aceternity" },
   ];
   let [model, setModel] = useState(models[0].value);
+  let [uiLibrary, setUiLibrary] = useState(uiLibraries[0].value);
   let [shadcn, setShadcn] = useState(false);
   let [modification, setModification] = useState("");
   let [generatedCode, setGeneratedCode] = useState("");
@@ -67,7 +70,7 @@ export default function Home() {
           },
           body: JSON.stringify({
             model,
-            shadcn,
+            uiLibrary,
             messages: [{ role: "user", content: prompt }],
           }),
         });
@@ -104,7 +107,7 @@ export default function Home() {
         setStatus("initial");
       }
     },
-    [status, model, shadcn, prompt, scrollTo]
+    [status, model, uiLibrary, prompt, scrollTo]
   );
   
 
@@ -129,7 +132,7 @@ export default function Home() {
           body: JSON.stringify({
             messages: [...messages, codeMessage, modificationMessage],
             model: initialAppConfig.model,
-            shadcn: initialAppConfig.shadcn,
+            uiLibrary,
           }),
         });
   
@@ -265,6 +268,47 @@ export default function Home() {
           </Select.Portal>
         </Select.Root>
       </div>
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-muted-foreground">Library:</span>
+        <Select.Root
+          name="uiLibrary"
+          disabled={loading}
+          value={uiLibrary}
+          onValueChange={(value) => setUiLibrary(value)}
+        >
+          <Select.Trigger className="w-full flex items-center justify-between rounded-lg border border-gray-300 bg-white px-2 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand">
+            <Select.Value />
+            <Select.Icon>
+              <ChevronDownIcon className="size-4 text-gray-300" />
+            </Select.Icon>
+          </Select.Trigger>
+          <Select.Portal>
+            <Select.Content className="overflow-hidden rounded-md bg-white shadow-lg">
+              <Select.Viewport className="p-2">
+                {uiLibraries.map((library) => (
+                  <Select.Item
+                    key={library.value}
+                    value={library.value}
+                    className="flex cursor-pointer items-center rounded-md px-3 py-2 text-sm data-[highlighted]:bg-gray-100 data-[highlighted]:outline-none"
+                  >
+                    <Select.ItemText asChild>
+                      <span className="inline-flex items-center gap-2 text-gray-500">
+                        <div className="size-2 rounded-full bg-brand" />
+                        {library.label}
+                      </span>
+                    </Select.ItemText>
+                    <Select.ItemIndicator className="ml-auto">
+                      <CheckIcon className="size-5 text-brand" />
+                    </Select.ItemIndicator>
+                  </Select.Item>
+                ))}
+              </Select.Viewport>
+              <Select.ScrollDownButton />
+              <Select.Arrow />
+            </Select.Content>
+          </Select.Portal>
+        </Select.Root>
+      </div>
       <div>
       <Button
         type="button" // Change type to "button" to prevent form submission
@@ -292,7 +336,7 @@ export default function Home() {
           onAnimationComplete={() => scrollTo()}
           ref={ref}
         >
-          <div className="mt-5 flex gap-4">
+          <div className="mt-5">
             <form className="w-full" onSubmit={updateApp}>
               <fieldset disabled={loading} className="group">
                 <div className="relative">
@@ -322,55 +366,11 @@ export default function Home() {
                 </div>
               </fieldset>
             </form>
-            <div className="w-[160px]">
+            <div className="w-[100%]">
               <Toaster invert={true} />
               <Tooltip.Provider>
                 <Tooltip.Root>
                   <Tooltip.Trigger asChild>
-                    <button
-                      disabled={loading || isPublishing}
-                      onClick={async () => {
-                        setIsPublishing(true);
-                        let userMessages = messages.filter(
-                          (message) => message.role === "user"
-                        );
-                        let prompt =
-                          userMessages[userMessages.length - 1].content;
-
-                        const appId = await minDelay(
-                          shareApp({
-                            generatedCode,
-                            prompt,
-                            model: initialAppConfig.model,
-                          }),
-                          1000
-                        );
-                        setIsPublishing(false);
-                        toast.success(
-                          `Your app has been published & copied to your clipboard! reactai.vasarai.net/share/${appId}`
-                        );
-                        navigator.clipboard.writeText(
-                          `${domain}/share/${appId}`
-                        );
-                      }}
-                      className="inline-flex py-2 w-full items-center justify-center gap-2 rounded-md bg-brand transition enabled:hover:bg-zinc-900 disabled:grayscale"
-                    >
-                      <span className="relative">
-                        {isPublishing && (
-                          <span className="absolute inset-0 flex items-center justify-center">
-                            <LoadingDots color="white" style="large" />
-                          </span>
-                        )}
-
-                        <ArrowUpOnSquareIcon
-                          className={`${isPublishing ? "invisible" : ""} size-5 text-xl text-white`}
-                        />
-                      </span>
-
-                      <p className="text-md font-medium text-white">
-                        Publish app
-                      </p>
-                    </button>
                   </Tooltip.Trigger>
                   <Tooltip.Portal>
                     <Tooltip.Content

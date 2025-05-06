@@ -4,7 +4,7 @@ import * as shadcnComponents from "@/utils/shadcn";
 import { Sandpack } from "@codesandbox/sandpack-react";
 import {
   SandpackPreview,
-  SandpackProvider,
+  SandpackProvider
 } from "@codesandbox/sandpack-react/unstyled";
 import { sandpackDark as draculaTheme } from "@codesandbox/sandpack-themes";
 import dedent from "dedent";
@@ -41,11 +41,7 @@ export default function CodeViewer({
       options={{ ...sharedOptions }}
       {...sharedProps}
     >
-      <SandpackPreview
-        className="flex h-full w-full grow flex-col justify-center p-4 md:pt-16"
-        showOpenInCodeSandbox={false}
-        showRefreshButton={false}
-      />
+      <SandpackPreview className="flex h-full w-full grow flex-col justify-center p-4 md:pt-16" showOpenInCodeSandbox={false} showRefreshButton={false} />
     </SandpackProvider>
   );
 }
@@ -95,6 +91,7 @@ let sharedProps = {
       "tailwind-merge": "^2.4.0",
       "tailwindcss-animate": "^1.0.7",
       vaul: "^0.9.1",
+      "@tsparticles/react": "^3.0.0",
     },
   },
 } as const;
@@ -145,7 +142,7 @@ let sharedFiles = {
   "/components/ui/tooltip.tsx": shadcnComponents.tooltip,
   "/components/ui/use-toast.tsx": shadcnComponents.useToast,
   "/public/index.html": dedent`
-    <!DOCTYPE html>
+<!DOCTYPE html>
     <html lang="en">
       <head>
         <meta charset="UTF-8">
@@ -157,5 +154,5 @@ let sharedFiles = {
         <div id="root"></div>
       </body>
     </html>
-  `,
+`,
 };
